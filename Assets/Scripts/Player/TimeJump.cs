@@ -28,7 +28,7 @@ public class TimeJump : MonoBehaviour
     [SerializeField] private SpriteRenderer _sr;
     [SerializeField] private Light2D _aura;
     [SerializeField] private Volume _effectVolume;
-    [SerializeField] private ParticleSystem _particleEffects;
+    [SerializeField] public ParticleSystem ParticleEffects;
     private Action<float> _effectCallback;
 
     void Start()
@@ -143,7 +143,7 @@ public class TimeJump : MonoBehaviour
         _reseted = false;
         SetVisualStatus(false);
         _timeSinceLastUse = 0f;    
-        _particleEffects.Play();
+        ParticleEffects.Play();
     }
     public void Disable()
     {

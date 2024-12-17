@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
     public Action<float> UpdateControlAuthority;
     private float _controlAuthority = 1;
 
+    public Interaction CurrentInteraction = null;
     
     void Awake()
     {
@@ -179,8 +180,6 @@ public class PlayerController : MonoBehaviour
         float force = (delta * _rideSpringStrength) - (velocity * _rideSpringDamping);
 
         _rb.AddForce(force * Time.fixedDeltaTime * Vector2.down);
-        Debug.DrawRay(transform.position, Vector2.down * force, Color.red);
-        Debug.DrawRay(transform.position, Vector2.down * _rideHeightBuffer, Color.green);
     }
 
     void IncrementTimers()
@@ -204,12 +203,18 @@ public class PlayerController : MonoBehaviour
         _jumpCount++;
         _jumpRequest = true;
     }
-
+    
     void OnJumpCanceled(InputAction.CallbackContext ctx)
     {
         _jumpRequest = false;
         _jumpCancelRequest = true;
         _jumped = false;
+    }
+
+    void OnInteractionPerformed(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("Interaction performed");
+        CurrentInteraction?.Interact();
     }
 
     /// <summary>
@@ -224,6 +229,7 @@ public class PlayerController : MonoBehaviour
         _keybinds.Player.Crouch.performed += _jumpDrive.EnableSlowmotion;
         _keybinds.Player.Crouch.canceled += _jumpDrive.SlowmotionProxy;
         _keybinds.Player.Sprint.performed += _jumpDrive.PerformTimeLeap;
+        _keybinds.Player.Interact.performed += OnInteractionPerformed;
     }
 
     /// <summary>
@@ -238,6 +244,7 @@ public class PlayerController : MonoBehaviour
         _keybinds.Player.Crouch.performed -= _jumpDrive.EnableSlowmotion;
         _keybinds.Player.Crouch.canceled -= _jumpDrive.SlowmotionProxy;
         _keybinds.Player.Sprint.performed -= _jumpDrive.PerformTimeLeap;
+        _keybinds.Player.Interact.performed -= OnInteractionPerformed;
     }
 #endregion
 }
