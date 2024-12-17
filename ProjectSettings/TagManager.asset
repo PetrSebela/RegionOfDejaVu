@@ -14,9 +14,9 @@ TagManager:
   - Background
   - Foreground
   - Postprocessing
-  - 
-  - 
-  - 
+  - DeathTrigger
+  - Player
+  - Interact
   - 
   - 
   - 

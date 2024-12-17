@@ -50,6 +50,14 @@ public class PlayerController : MonoBehaviour
         _keybinds.Disable();
         UnlinkKeybinds();
     }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if(col.gameObject.layer != LayerMask.NameToLayer("DeathTrigger"))
+            return;
+        GameManager.Instance.PlayerDied();
+    }
+
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -112,6 +120,10 @@ public class PlayerController : MonoBehaviour
             _rb.linearVelocityX += _airAcceleration * Time.fixedDeltaTime * _wishDir.x;
             _rb.linearVelocityX = Mathf.Clamp(_rb.linearVelocityX, -_topSpeed, _topSpeed);
         }
+    }
+    public void DieHorribleDeath()
+    {
+        _jumpDrive.DisableSlowmotion();
     }
     void ProcessJump()
     {
