@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using TMPro;
-using UnityEditor.SearchService;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
@@ -19,6 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] CanvasGroup _gameUI;
     [SerializeField] CanvasGroup _gameFinishedScreen;
     [SerializeField] Volume _gameBlur;
+    [SerializeField] ParticleSystem[] _timeMachineParticles;
     private Action<float> _deathScreenFadeCallback;
     private Action<float> _uiFadeCallback;
     private Action<float> _gameFinishedCallback;
@@ -36,17 +36,32 @@ public class GameManager : MonoBehaviour
     [SerializeField] ButtonInteraction doorOpen;
     [SerializeField] GameObject coolantDoors;
     [SerializeField] GameObject coreDoors;
+    [SerializeField] AudioSource _timeMachineSound;
+
+    public bool Paused = false;
+    [SerializeField] CanvasGroup pauseMenu;
+    private Action<float> _pauseMenuFade;
 
     void Start()
     {
         _deathScreenFadeCallback += SetDeathScreenFade;
         _gameFinishedCallback += SetGameFinishedAlpha;
         _uiFadeCallback += SetUIAlphaCallback;
+        _pauseMenuFade += PauseMenuFade;
         Instance = this;
         SetDeathScreenFade(0);
         SetGameFinishedAlpha(0);
         SetUIAlphaCallback(0);
         SpawnPlayer();
+        foreach(ParticleSystem p in _timeMachineParticles)
+            p.Stop();
+
+        TogglePause();
+    }
+    void PauseMenuFade(float alpha)
+    {
+        pauseMenu.alpha = alpha;
+        _gameBlur.weight = alpha;
     }
 
     void SetGameFinishedAlpha(float alpha)
@@ -54,10 +69,17 @@ public class GameManager : MonoBehaviour
         _gameFinishedScreen.alpha = alpha;
         _gameBlur.weight = alpha;
     }
+    
     void SetUIAlphaCallback(float alpha)
     {
         _gameUI.alpha = alpha;
     }
+
+    public void Quit()
+    {
+        Application.Quit();
+    }
+
     void Update()
     {
         // Too lazy to create separate script for tracking
@@ -113,6 +135,26 @@ public class GameManager : MonoBehaviour
         _gameBlur.weight = fadeValue;
     }
 
+    public void TogglePause()
+    {
+        Paused = !Paused;
+
+        if(Paused)
+        {
+            LeanTween.value(this.gameObject, _pauseMenuFade, pauseMenu.alpha, 1, 0.125f).setIgnoreTimeScale(true);
+            pauseMenu.interactable = true;
+            pauseMenu.blocksRaycasts = true;
+            Time.timeScale = 0;
+        }
+        else
+        {
+            LeanTween.value(this.gameObject, _pauseMenuFade, pauseMenu.alpha, 0, 0.125f).setIgnoreTimeScale(true);
+            pauseMenu.interactable = false;
+            pauseMenu.blocksRaycasts = false;
+            Time.timeScale = 1;
+        }
+    }
+
 #region  StoryPoints
     public void LaunchExperiment()
     {
@@ -123,7 +165,15 @@ public class GameManager : MonoBehaviour
         doorOpen.enabled = true;
         _securityShutdownButton.enabled = true;
         LeanTween.value(this.gameObject, _uiFadeCallback, _gameUI.alpha , 1, 0.5f);
+        
+        foreach(ParticleSystem p in _timeMachineParticles)
+            p.Play();
+
+        _timeMachineSound.Play();
     } 
+
+    
+
     public void SecurityShutdown()
     {
         Debug.Log("Story: Security shutdown");
@@ -144,8 +194,10 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Story: main core shutdown");
         _mainCoreShutdown = true;
-
+        foreach(ParticleSystem p in _timeMachineParticles)
+            p.Stop();
         OnGameFinished();
+        _timeMachineSound.Stop();
     } 
 
     

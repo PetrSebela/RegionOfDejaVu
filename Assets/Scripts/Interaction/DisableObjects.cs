@@ -2,12 +2,15 @@ using UnityEngine;
 
 public class DisableObjects : Interaction
 {
-    [SerializeField] GameObject _disabledObject;
-    [SerializeField] GameObject _enabledObject;
+    [SerializeField] GameObject[] _disabledObject;
+    [SerializeField] GameObject[] _enabledObject;
 
     public override void Interact()
     {
-        _disabledObject?.SetActive(false);
-        _enabledObject?.SetActive(true);
+        foreach(GameObject go in _disabledObject)
+            go?.SetActive(false);
+    
+        foreach(GameObject go in _enabledObject)
+            go?.SetActive(true);
     }
 }

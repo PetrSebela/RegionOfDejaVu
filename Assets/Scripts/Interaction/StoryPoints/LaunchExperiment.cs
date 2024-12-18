@@ -4,6 +4,7 @@ public class LaunchExperiment : Interaction
 {
     public override void Interact()
     {
-       GameManager.Instance.LaunchExperiment();
+        GameManager.Instance.LaunchExperiment();
+        effect?.Play();
     }
 }

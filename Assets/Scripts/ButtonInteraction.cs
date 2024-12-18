@@ -28,9 +28,6 @@ public class ButtonInteraction : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D col)
     {
-        if(!enabled)
-            return;
-
         if(col.gameObject.layer != LayerMask.NameToLayer("Player"))
             return;
 

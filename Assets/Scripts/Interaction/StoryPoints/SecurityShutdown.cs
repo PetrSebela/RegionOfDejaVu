@@ -4,6 +4,7 @@ public class SecurityShutdown : Interaction
 {
     public override void Interact()
     {
-       GameManager.Instance.SecurityShutdown();
+        GameManager.Instance.SecurityShutdown();
+        effect?.Play();
     }
 }

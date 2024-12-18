@@ -4,6 +4,7 @@ public class ShutdownCoolant : Interaction
 {
     public override void Interact()
     {
-       GameManager.Instance.ShutdownCryoCoolant();
+        GameManager.Instance.ShutdownCryoCoolant();
+        effect?.Play();
     }
 }

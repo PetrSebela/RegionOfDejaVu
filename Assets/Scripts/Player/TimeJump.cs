@@ -130,7 +130,7 @@ public class TimeJump : MonoBehaviour
     }
     public void PerformTimeLeap(InputAction.CallbackContext ctx)
     {
-        if(!_jumpDriveAvialable || !Active)
+        if(!_jumpDriveAvialable || !Active || GameManager.Instance.Paused)
             return;
         Vector3 leapDirection = _loopSamples[0] - transform.position;
         leapDirection = Vector3.ClampMagnitude(leapDirection * _leapStrength, _leapStrengthLimit);

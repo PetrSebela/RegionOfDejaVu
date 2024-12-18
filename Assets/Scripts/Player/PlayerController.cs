@@ -73,6 +73,7 @@ public class PlayerController : MonoBehaviour
     {
         IncrementTimers();
         ProcessJump();
+        ApplyJumpForce();
     }
     
     /// <summary>
@@ -80,7 +81,6 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        ApplyJumpForce();
         ApplyMoveForce();
 
         ApplyHoverForce();
@@ -89,21 +89,9 @@ public class PlayerController : MonoBehaviour
     }
     void SetControlAuthority(float authority)
     {
-        
-        // _rb.gravityScale = _gravityScale * authority;
         _controlAuthority = authority;
-
-        // if (authority != 1)
-        // {
-        //     _rb.gravityScale = 0;
-        //     _controlAuthority = 0.01f;
-        // }
-        // else
-        // {
-        //     _rb.gravityScale = _gravityScale;
-        //     _controlAuthority = 1;
-        // }
     }
+
     void ApplyMoveForce()
     {
         if(IsGrounded())
@@ -118,7 +106,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            _rb.linearVelocityX += _airAcceleration * Time.fixedDeltaTime * _wishDir.x;
+            _rb.linearVelocityX += _airAcceleration * Time.fixedDeltaTime * _wishDir.x * _controlAuthority;
             _rb.linearVelocityX = Mathf.Clamp(_rb.linearVelocityX, -_topSpeed, _topSpeed);
         }
     }
@@ -151,9 +139,7 @@ public class PlayerController : MonoBehaviour
     void ApplyJumpForce()
     {
         if (_inJump && _jumpRequest && _timeInJump < _maxJumpTime)
-        {
-            _rb.AddForce(Vector2.up * _jumpForce * Time.fixedDeltaTime);
-        }
+            _rb.AddForce(Vector2.up * _jumpForce * Time.deltaTime);
     }
     bool CanJump()
     {
@@ -168,7 +154,7 @@ public class PlayerController : MonoBehaviour
 
     void ApplyHoverForce()
     {
-        if (_inJump || _timeInJump < 0.25f || _controlAuthority < 1)
+        if (_inJump || _timeInJump < 0.25f || _controlAuthority < 1 || _jumpRequest)
             return;
 
         RaycastHit2D hit = Physics2D.BoxCast(transform.position, _playerSize, 0, Vector2.down, _rideHeightBuffer, _groundMask);
@@ -187,6 +173,7 @@ public class PlayerController : MonoBehaviour
         float delta = Time.deltaTime;
         _timeInJump += delta;
     }
+
 
 #region Keybinds
     void OnMovePerformed(InputAction.CallbackContext ctx)
@@ -217,6 +204,11 @@ public class PlayerController : MonoBehaviour
         CurrentInteraction?.Interact();
     }
 
+    void PauseProxy(InputAction.CallbackContext ctx)
+    {
+        GameManager.Instance.TogglePause();
+    }
+
     /// <summary>
     /// Link all methods to inputactions object
     /// </summary>
@@ -230,6 +222,7 @@ public class PlayerController : MonoBehaviour
         _keybinds.Player.Crouch.canceled += _jumpDrive.SlowmotionProxy;
         _keybinds.Player.Sprint.performed += _jumpDrive.PerformTimeLeap;
         _keybinds.Player.Interact.performed += OnInteractionPerformed;
+        _keybinds.Player.Pause.performed += PauseProxy;
     }
 
     /// <summary>
@@ -245,6 +238,7 @@ public class PlayerController : MonoBehaviour
         _keybinds.Player.Crouch.canceled -= _jumpDrive.SlowmotionProxy;
         _keybinds.Player.Sprint.performed -= _jumpDrive.PerformTimeLeap;
         _keybinds.Player.Interact.performed -= OnInteractionPerformed;
+        _keybinds.Player.Pause.performed -= PauseProxy;
     }
 #endregion
 }
